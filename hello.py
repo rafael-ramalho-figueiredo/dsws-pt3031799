@@ -12,4 +12,8 @@ def user(name):
 @app.route('/contextorequisicao')
 def contextorequisicao():
     user_agent = request.headers.get('User-Agent');
-    return '<p>Your browser is {}</p>'.format(user_agent);
+    return '<p>Your browser is {}</p>'.format(user_agent)
+
+@app.route('/codigostatusdiferente')
+def codigostatusdiferente():
+    return '<p>Bad request</p>'

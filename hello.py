@@ -1,5 +1,5 @@
 # A very simple Flask Hello World app for you to get started with...
-from flask import Flask, request
+from flask import Flask, request, redirect
 app = Flask(__name__)
 @app.route('/')
 def hello_world():
@@ -21,3 +21,7 @@ def codigostatusdiferente():
 @app.route('/objetoresposta')
 def objetoresposta():
     return '<h1>This document carries a cookie!</h1>'
+
+@app.route('/redirecionamento')
+def redirecionamento():
+    return redirect('https://ptb.ifsp.edu.br/', code=302)

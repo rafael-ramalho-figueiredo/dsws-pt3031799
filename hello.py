@@ -17,3 +17,7 @@ def contextorequisicao():
 @app.route('/codigostatusdiferente')
 def codigostatusdiferente():
     return '<p>Bad request</p>'
+
+@app.route('/objetoresposta')
+def objetoresposta():
+    return '<h1>This document carries a cookie!</h1>'

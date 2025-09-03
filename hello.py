@@ -18,7 +18,7 @@ def user(name):
 
 @app.route('/user/<name>/<prontuario>/<instituto>')
 def user2(name, prontuario, instituto):
-    return '<h1>Avaliação contínua: Aula 030</h1><h2>Aluno: {}</h2><h2>Prontuário: {}</h2><h2>Instituição: {}</h2><a href="/">Voltar</a>'.format(name, prontuario, instituto)
+    return render_template('id.html', name=name, prontuario=prontuario, instituto=instituto)
 
 @app.route('/contextorequisicao')
 def contextorequisicao():
@@ -26,6 +26,13 @@ def contextorequisicao():
     ip = request.remote_addr;
     url = request.host
     return '<h1>Avaliação contínua: Aula 030</h1><h2>Seu navegador é: {}</h2><h2>O IP do computador remoto é: {}</h2><h2>O host da aplicação é: {}</h2><a href="/">Voltar</a>'.format(user_agent, ip, url)
+
+@app.route('/contextorequisicao/<name>')
+def contextouser(name):
+    user_agent = request.headers.get('User-Agent');
+    ip = request.remote_addr;
+    url = request.host
+    return render_template('contexto.html', name=name, user_agent=user_agent, ip=ip, url=url)
 
 @app.route('/codigostatusdiferente')
 def codigostatusdiferente():

@@ -9,32 +9,16 @@
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 {% endblock %}
 
-{% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
-    <div class="container">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/">Flasky</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
-            </ul>
-        </div>
-    </div>
+{% block page_content %}
+<div class="container page-header">
+    <h1 class="ml-2 mt-5">Dados da última atualização:</h1>
+    <hr/>
 </div>
-{% endblock %}
 
-{% block content %}
-<div class="container">
-    {% block page_content %}
-        <h1>Hello World!</h1>
-    {% endblock %}
+<div class="container ">
+    <p class="ml-2">The local date and time is {{moment(current_time).format('LLL') }}</p>
+    <p class="ml-2">That was {{moment(current_time).fromNow(refresh=true) }}</p>
 </div>
-{% endblock %}
-
-{% block footer %}
-<p>The local date and time is {{moment(current_time).format('LLL') }}</p>
-<p>That was {{moment(current_time).fromNow(refresh=true) }}</p>
 {% endblock %}
 
 {% block scripts %}

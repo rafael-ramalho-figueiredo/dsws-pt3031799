@@ -8,13 +8,27 @@
     {% endblock %}
 </head>
 <body>
-    
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% block navbar %}
+        <div class="navbar navbar-inverse" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/">Avaliação contínua: <b>Aula 040</b></a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="mx-2"><a class="nav-link" href="/">Home</a></li>
+                        <li class="mx-2"><a class="nav-link" href="/user/Rafael%20Ramalho/PT3031799/IFSP">Identificação</a></li>
+                        <li class="mx-2"><a class="nav-link" href="/contextorequisicao/Rafael%20Ramalho">Contexto da requisição</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
         {% endblock %}
     </nav>
-    
-    <div id="content">{% block content %}{% endblock %}</div>
+
+    <div id="content">{% block content %}{% block page_content %}{% endblock %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}
         {% endblock %}

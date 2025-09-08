@@ -1,21 +1,25 @@
 
 {% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}Flasky{% endblock %}
 
 {% block head %}
 {{ super() }}
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 {% endblock %}
 
 {% block page_content %}
 <div class="container page-header">
-    <h1 class="ml-2 mt-5">Dados da última atualização:</h1>
+    <h1 class="ml-2 mt-5">Hello, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>
+    {{ wtf.quick_form(form) }}
     <hr/>
 </div>
 
+
+
 <div class="container ">
+    <h1 class="ml-2 mt-5">Dados da última atualização:</h1>
+    <hr/>
     <p class="ml-2">The local date and time is {{moment(current_time).format('LLL') }}</p>
     <p class="ml-2">That was {{moment(current_time).fromNow(refresh=true) }}</p>
 </div>

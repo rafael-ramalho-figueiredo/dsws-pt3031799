@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap
 from datetime import datetime
 from flask_moment import Moment
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, SelectField, PasswordField
 from wtforms.validators import DataRequired
 
 app = Flask(__name__)
@@ -13,19 +13,44 @@ bootstrap = Bootstrap(app)
 moment = Moment(app)
 
 class NameForm(FlaskForm):
-    name = StringField('What is your name?', validators=[DataRequired()])
+    name = StringField('Informe o seu nome:', validators=[DataRequired()])
+    surname = StringField('Informe o seu sobrenome:', validators=[DataRequired()])
+    institution = StringField('Informe a sua instituição de ensino:', validators=[DataRequired()])
+    course = SelectField('Informe a sua disciplina:', choices=[('DSWA5', 'DSWA5'), ('DSWA4', 'DSWA4'), ('Gestão de Projetos', 'Gestão de Projetos')])
+    submit = SubmitField('Submit')
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = NameForm()
-    if form.validate_on_submit():
+    ip = request.remote_addr;
+    url = request.host
+    if request.method == 'POST' and form.validate():
         old_name = session.get('name')
         if old_name is not None and old_name != form.name.data:
-            flash('Looks like you have changed your name!')
+            flash('Você alterou o seu nome!')
         session['name'] = form.name.data
+        session['surname'] = form.surname.data
+        session['institution'] = form.institution.data
+        session['course'] = form.course.data
         return redirect(url_for('index'))
-    return render_template('index.html', current_time=datetime.utcnow(), form=form, name=session.get('name'))
+    return render_template('index.html', current_time=datetime.utcnow(), ip=ip, url=url, form=form, name=session.get('name'), surname=session.get('surname'), institution=session.get('institution'), course=session.get('course'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if request.method == 'POST' and form.validate():
+        session['username'] = form.username.data
+        return redirect('loginResponse')
+    return render_template('login.html', current_time=datetime.utcnow(), form=form)
+
+@app.route('/loginResponse', methods=['GET', 'POST'])
+def loginResponse():
+    return render_template('loginResponse.html', current_time=datetime.utcnow(), username=session.get('username'))
 
 @app.route('/user/<name>')
 def user(name):

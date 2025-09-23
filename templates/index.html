@@ -10,19 +10,34 @@
 
 {% block page_content %}
 <div class="container page-header">
-    <h1 class="ml-2 mt-5">Olá, {% if name %}{{ name }} {{ surname }}{% else %}Estranho{% endif %}!</h1>
-    <h3 class="ml-2 mt-4">A sua instituição de ensino é a {{ institution }}</h2>
-    <h3 class="ml-2">Está cursando a disciplina de {{ course }}</h2>
-    <h4 class="ml-2 mt-4">O IP do computador remoto é: {{ ip }}</h2>
-    <h4 class="ml-2">O host da aplicação é: {{ url }}</h2>
+    <h1 class="ml-2 mt-5">Olá, {% if name %}{{ name }}{% else %}Estranho{% endif %}!</h1>
+    <p class="ml-2">Prazer em conhecê-lo!</p>
     <hr/>
     {{ wtf.quick_form(form) }}
     <hr/>
+    <h1>Registered Users</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome do Usuário</th>
+                <th>Função</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{% for role in roles %}{% if user.role_id == role.id %}{{ role.name }}{% endif %}{% endfor %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 
 
 <div class="container ">
+    <hr/>
     <h1 class="ml-2 mt-5">Dados da última atualização:</h1>
     <hr/>
     <p class="ml-2">The local date and time is {{moment(current_time).format('LLL') }}</p>

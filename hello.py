@@ -4,19 +4,40 @@ from flask_bootstrap import Bootstrap
 from datetime import datetime
 from flask_moment import Moment
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired
+import os
+from flask_sqlalchemy import SQLAlchemy
 
+basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'PTDSWS'
+app.config['SQLALCHEMY_DATABASE_URI'] =\
+    'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+    users = db.relationship('User', backref='role')
+
+    def __repr__(self):
+        return '<Role %r>' % self.name
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, index=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+
 class NameForm(FlaskForm):
     name = StringField('Informe o seu nome:', validators=[DataRequired()])
-    surname = StringField('Informe o seu sobrenome:', validators=[DataRequired()])
-    institution = StringField('Informe a sua instituição de ensino:', validators=[DataRequired()])
-    course = SelectField('Informe a sua disciplina:', choices=[('DSWA5', 'DSWA5'), ('DSWA4', 'DSWA4'), ('Gestão de Projetos', 'Gestão de Projetos')])
     submit = SubmitField('Submit')
 
 class LoginForm(FlaskForm):
@@ -24,21 +45,30 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db, User=User, Role=Role)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    users = User.query.all()
+    roles = Role.query.all()
     form = NameForm()
-    ip = request.remote_addr;
+    ip = request.remote_addr
     url = request.host
     if request.method == 'POST' and form.validate():
         old_name = session.get('name')
+        user_role = Role.query.filter_by(name='User').first()
         if old_name is not None and old_name != form.name.data:
             flash('Você alterou o seu nome!')
+        existing_user = User.query.filter_by(username=form.name.data).first()
+        if not existing_user:
+            new_user = User(username=form.name.data, role=user_role)
+            db.session.add(new_user)
+            db.session.commit()
         session['name'] = form.name.data
-        session['surname'] = form.surname.data
-        session['institution'] = form.institution.data
-        session['course'] = form.course.data
         return redirect(url_for('index'))
-    return render_template('index.html', current_time=datetime.utcnow(), ip=ip, url=url, form=form, name=session.get('name'), surname=session.get('surname'), institution=session.get('institution'), course=session.get('course'))
+    return render_template('index.html', current_time=datetime.utcnow(), ip=ip, url=url, form=form, name=session.get('name'), users=users, roles=roles)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

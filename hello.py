@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap
 from datetime import datetime
 from flask_moment import Moment
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, SelectField
 from wtforms.validators import DataRequired
 import os
 from flask_sqlalchemy import SQLAlchemy
@@ -38,6 +38,7 @@ class User(db.Model):
 
 class NameForm(FlaskForm):
     name = StringField('Informe o seu nome:', validators=[DataRequired()])
+    role = SelectField('Função:', choices=[('Admin', 'Admin'), ('Moderator', 'Moderator'), ('User', 'User')])
     submit = SubmitField('Submit')
 
 class LoginForm(FlaskForm):
@@ -52,13 +53,15 @@ def make_shell_context():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     users = User.query.all()
+    total_users = User.query.count()
     roles = Role.query.all()
+    total_roles = Role.query.count()
     form = NameForm()
     ip = request.remote_addr
     url = request.host
     if request.method == 'POST' and form.validate():
         old_name = session.get('name')
-        user_role = Role.query.filter_by(name='User').first()
+        user_role = Role.query.filter_by(name=form.role.data).first()
         if old_name is not None and old_name != form.name.data:
             flash('Você alterou o seu nome!')
         existing_user = User.query.filter_by(username=form.name.data).first()
@@ -68,7 +71,7 @@ def index():
             db.session.commit()
         session['name'] = form.name.data
         return redirect(url_for('index'))
-    return render_template('index.html', current_time=datetime.utcnow(), ip=ip, url=url, form=form, name=session.get('name'), users=users, roles=roles)
+    return render_template('index.html', current_time=datetime.utcnow(), ip=ip, url=url, form=form, name=session.get('name'), users=users, roles=roles, total_users=total_users, total_roles=total_roles)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

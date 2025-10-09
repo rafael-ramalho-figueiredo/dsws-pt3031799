@@ -14,60 +14,6 @@
     <p class="ml-2">Prazer em conhecê-lo!</p>
     <hr/>
     {{ wtf.quick_form(form) }}
-    <hr/>
-    <h1>Relação de usuários cadastrados</h1>
-    <h4>Quantidade: {{ total_users }}</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nome do Usuário</th>
-                <th>Função</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{% for role in roles %}{% if user.role_id == role.id %}{{ role.name }}{% endif %}{% endfor %}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <hr/>
-    <h1>Relação de funções cadastradas</h1>
-    <h4>Quantidade: {{ total_roles }}</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Funções</th>
-                <th>Usuários</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for role in roles %}
-            <tr>
-                <td>{{ role.name }}</td>
-                <td>
-                    <ol>
-                        {% for user in users %}
-                        {% if user.role_id == role.id %}<li>{{ user.username }}</li>{% endif %}
-                        {% endfor %}
-                    </ol>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-
-
-<div class="container ">
-    <hr/>
-    <h1 class="ml-2 mt-5">Dados da última atualização:</h1>
-    <hr/>
-    <p class="ml-2">The local date and time is {{moment(current_time).format('LLL') }}</p>
-    <p class="ml-2">That was {{moment(current_time).fromNow(refresh=true) }}</p>
 </div>
 {% endblock %}
 

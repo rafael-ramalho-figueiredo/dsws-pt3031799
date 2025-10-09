@@ -8,6 +8,11 @@ from wtforms import StringField, SubmitField, PasswordField, SelectField
 from wtforms.validators import DataRequired
 import os
 from flask_sqlalchemy import SQLAlchemy
+import requests
+from dotenv import load_dotenv
+
+project_folder = os.path.expanduser('~/flask')
+load_dotenv(os.path.join(project_folder, '.env'))
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
@@ -17,6 +22,31 @@ app.config['SQLALCHEMY_DATABASE_URI'] =\
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
+
+app.config['API_KEY'] = os.environ.get('API_KEY')
+app.config['API_URL'] = os.environ.get('API_URL')
+app.config['API_FROM'] = os.environ.get('API_FROM')
+
+app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky]'
+app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
+
+def send_simple_message(to, subject, newUser):
+    print('Enviando mensagem (POST)...', flush=True)
+    print('URL: ' + str(app.config['API_URL']), flush=True)
+    print('api: ' + str(app.config['API_KEY']), flush=True)
+    print('from: ' + str(app.config['API_FROM']), flush=True)
+    print('to: ' + str(to), flush=True)
+    print('subject: ' + str(app.config['FLASKY_MAIL_SUBJECT_PREFIX']) + ' ' + subject, flush=True)
+    print('text: ' + "Novo usuário cadastrado: " + newUser, flush=True)
+
+    resposta = requests.post(app.config['API_URL'],
+                             auth=("api", app.config['API_KEY']), data={"from": app.config['API_FROM'],
+                                                                        "to": to,
+                                                                        "subject": app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + ' ' + subject,
+                                                                        "text": "PT3031799\nRafael Ramalho Figueiredo\nNovo usuário cadastrado: " + newUser})
+
+    print('Enviando mensagem (Resposta)...' + str(resposta) + ' - ' + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), flush=True)
+    return resposta
 
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -38,7 +68,6 @@ class User(db.Model):
 
 class NameForm(FlaskForm):
     name = StringField('Informe o seu nome:', validators=[DataRequired()])
-    role = SelectField('Função:', choices=[('Admin', 'Admin'), ('Moderator', 'Moderator'), ('User', 'User')])
     submit = SubmitField('Submit')
 
 class LoginForm(FlaskForm):
@@ -52,26 +81,35 @@ def make_shell_context():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    users = User.query.all()
-    total_users = User.query.count()
-    roles = Role.query.all()
-    total_roles = Role.query.count()
     form = NameForm()
-    ip = request.remote_addr
-    url = request.host
-    if request.method == 'POST' and form.validate():
-        old_name = session.get('name')
-        user_role = Role.query.filter_by(name=form.role.data).first()
-        if old_name is not None and old_name != form.name.data:
-            flash('Você alterou o seu nome!')
-        existing_user = User.query.filter_by(username=form.name.data).first()
-        if not existing_user:
-            new_user = User(username=form.name.data, role=user_role)
-            db.session.add(new_user)
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.name.data).first()
+        if user is None:
+            user = User(username=form.name.data)
+            db.session.add(user)
             db.session.commit()
+            session['known'] = False
+
+            print('Verificando variáveis de ambiente: Server log do PythonAnyWhere', flush=True)
+            print('FLASKY_ADMIN: ' + str(app.config['FLASKY_ADMIN']), flush=True)
+            print('URL: ' + str(app.config['API_URL']), flush=True)
+            print('api: ' + str(app.config['API_KEY']), flush=True)
+            print('from: ' + str(app.config['API_FROM']), flush=True)
+            print('to: ' + str([app.config['FLASKY_ADMIN'], "flaskaulasweb@zohomail.com"]), flush=True)
+            print('subject: ' + str(app.config['FLASKY_MAIL_SUBJECT_PREFIX']), flush=True)
+            print('text: ' + "Novo usuário cadastrado: " + form.name.data, flush=True)
+
+            if app.config['FLASKY_ADMIN']:
+                print('Enviando mensagem...', flush=True)
+                send_simple_message(f"{app.config['FLASKY_ADMIN']}, flaskaulasweb@zohomail.com", 'Novo usuário', form.name.data)
+                print('Mensagem enviada...', flush=True)
+        else:
+            session['known'] = True
+
         session['name'] = form.name.data
         return redirect(url_for('index'))
-    return render_template('index.html', current_time=datetime.utcnow(), ip=ip, url=url, form=form, name=session.get('name'), users=users, roles=roles, total_users=total_users, total_roles=total_roles)
+    return render_template('index.html', form=form, name=session.get('name'),
+                           known=session.get('known', False))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

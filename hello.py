@@ -1,10 +1,10 @@
 # A very simple Flask Hello World app for you to get started with...
-from flask import Flask, request, redirect, render_template, session, url_for, flash
+from flask import Flask, request, redirect, render_template, session, url_for
 from flask_bootstrap import Bootstrap
 from datetime import datetime
 from flask_moment import Moment
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, SelectField
+from wtforms import StringField, SubmitField, PasswordField, BooleanField
 from wtforms.validators import DataRequired
 import os
 from flask_sqlalchemy import SQLAlchemy
@@ -68,6 +68,7 @@ class User(db.Model):
 
 class NameForm(FlaskForm):
     name = StringField('Informe o seu nome:', validators=[DataRequired()])
+    email = BooleanField('Deseja enviar e-mail para flaskaulasweb@zohomail.com?')
     submit = SubmitField('Submit')
 
 class LoginForm(FlaskForm):
@@ -81,11 +82,14 @@ def make_shell_context():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    users = User.query.all()
+    roles = Role.query.all()
     form = NameForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.name.data).first()
+        user_role = Role.query.filter_by(name='User').first()
         if user is None:
-            user = User(username=form.name.data)
+            user = User(username=form.name.data, role=user_role)
             db.session.add(user)
             db.session.commit()
             session['known'] = False
@@ -101,14 +105,17 @@ def index():
 
             if app.config['FLASKY_ADMIN']:
                 print('Enviando mensagem...', flush=True)
-                send_simple_message(f"{app.config['FLASKY_ADMIN']}, flaskaulasweb@zohomail.com", 'Novo usuário', form.name.data)
+                if form.email.data:
+                    send_simple_message(f"{app.config['FLASKY_ADMIN']}, flaskaulasweb@zohomail.com", 'Novo usuário', form.name.data)
+                else:
+                    send_simple_message(f"{app.config['FLASKY_ADMIN']}", 'Novo usuário', form.name.data)
                 print('Mensagem enviada...', flush=True)
         else:
             session['known'] = True
 
         session['name'] = form.name.data
         return redirect(url_for('index'))
-    return render_template('index.html', form=form, name=session.get('name'),
+    return render_template('index.html', users=users, roles=roles, form=form, name=session.get('name'),
                            known=session.get('known', False))
 
 @app.route('/login', methods=['GET', 'POST'])

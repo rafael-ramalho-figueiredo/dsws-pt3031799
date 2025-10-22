@@ -1,0 +1,45 @@
+
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block page_content %}
+<div class="container page-header">
+    <h1 class="ml-2 mt-5">E-mails enviados</h1>
+    <p class="ml-2">Relação de e-mails enviados para o administrador do sistema, notificando o cadastro de novos usuários.</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>De</th>
+                <th>Para</th>
+                <th>Assunto</th>
+                <th>Texto</th>
+                <th>Data/Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for email in emails %}
+            <tr>
+                <td>{{ email.username }}</td>
+                <td>{{ email.recipient }}</td>
+                <td>{{ email.subject }}</td>
+                <td>{{ email.text }}</td>
+                <td>{{ moment(email.datetime_email).format('DD/MM/YYYY HH:mm:ss') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+{% endblock %}
+base.html
+Exibindo base.html…

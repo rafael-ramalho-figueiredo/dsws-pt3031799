@@ -66,6 +66,17 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
 
+class Email(db.Model):
+    __tablename__ = 'emails'
+    username = db.Column(db.String(64), primary_key=True)
+    recipient = db.Column(db.String(64), index=True)
+    subject = db.Column(db.String(64), index=True)
+    text = db.Column(db.String(255), index=True)
+    datetime_email = db.Column(db.DateTime, default=datetime.now)
+
+    def __repr__(self):
+        return '<Email %r>' % self.username
+
 class NameForm(FlaskForm):
     name = StringField('Informe o seu nome:', validators=[DataRequired()])
     email = BooleanField('Deseja enviar e-mail para flaskaulasweb@zohomail.com?')
@@ -107,8 +118,14 @@ def index():
                 print('Enviando mensagem...', flush=True)
                 if form.email.data:
                     send_simple_message(f"{app.config['FLASKY_ADMIN']}, flaskaulasweb@zohomail.com", 'Novo usuário', form.name.data)
+                    email = Email(username=form.name.data, recipient=f"{app.config['FLASKY_ADMIN']}, flaskaulasweb@zohomail.com", subject=app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + ' Novo usuário', text="PT3031799\nRafael Ramalho Figueiredo\nNovo usuário cadastrado: " + form.name.data)
+                    db.session.add(email)
+                    db.session.commit()
                 else:
                     send_simple_message(f"{app.config['FLASKY_ADMIN']}", 'Novo usuário', form.name.data)
+                    email = Email(username=form.name.data, recipient=f"{app.config['FLASKY_ADMIN']}", subject=app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + ' Novo usuário', text="PT3031799\nRafael Ramalho Figueiredo\nNovo usuário cadastrado: " + form.name.data)
+                    db.session.add(email)
+                    db.session.commit()
                 print('Mensagem enviada...', flush=True)
         else:
             session['known'] = True
@@ -117,6 +134,11 @@ def index():
         return redirect(url_for('index'))
     return render_template('index.html', users=users, roles=roles, form=form, name=session.get('name'),
                            known=session.get('known', False))
+
+@app.route('/emailsEnviados')
+def email_enviados():
+    emails = Email.query.all()
+    return render_template('emails.html', emails=emails)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

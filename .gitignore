@@ -6,3 +6,7 @@ __pycache__/
 
 # Ignore virtual environment directories
 venv/
+
+.env
+
+create_environment_variables.sh

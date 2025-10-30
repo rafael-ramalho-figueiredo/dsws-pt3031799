@@ -1,2 +1,0 @@
-# Desenvolvimento web com flask
-

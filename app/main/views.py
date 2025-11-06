@@ -23,9 +23,6 @@ def index():
             if current_app.config['FLASKY_ADMIN']:
                 print('Enviando mensagem...', flush=True)
                 send_simple_message(f"{current_app.config['FLASKY_ADMIN']}, flaskaulasweb@zohomail.com", 'Novo usuário', form.name.data)
-                email = Email(username=form.name.data, recipient=f"{current_app.config['FLASKY_ADMIN']}, flaskaulasweb@zohomail.com", subject=current_app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + ' Novo usuário', text="PT3031799\nRafael Ramalho Figueiredo\nNovo usuário cadastrado: " + form.name.data)
-                db.session.add(email)
-                db.session.commit()
                 print('Mensagem enviada...', flush=True)
         else:
             session['known'] = True

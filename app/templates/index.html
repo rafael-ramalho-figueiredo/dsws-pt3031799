@@ -10,27 +10,8 @@
 
 {% block page_content %}
 <div class="container page-header">
-    <h1 class="ml-2 mt-5">Olá, {% if name %}{{ name }}{% else %}Desconhecido{% endif %}!</h1>
-    <p class="ml-2">Prazer em conhecê-lo!</p>
+    <h1 class="ml-2 mt-5">Hello, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}!</h1>
     <hr/>
-    {{ wtf.quick_form(form) }}
-    <h1>Relação de usuários cadastrados</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nome do Usuário</th>
-                <th>Função</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{% for role in roles %}{% if user.role_id == role.id %}{{ role.name }}{% endif %}{% endfor %}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 
 {% endblock %}

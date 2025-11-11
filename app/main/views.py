@@ -37,18 +37,6 @@ def email_enviados():
     emails = Email.query.all()
     return render_template('emails.html', emails=emails)
 
-@main.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if request.method == 'POST' and form.validate():
-        session['username'] = form.username.data
-        return redirect('loginResponse')
-    return render_template('login.html', current_time=datetime.utcnow(), form=form)
-
-@main.route('/loginResponse', methods=['GET', 'POST'])
-def loginResponse():
-    return render_template('loginResponse.html', current_time=datetime.utcnow(), username=session.get('username'))
-
 @main.route('/user/<name>')
 def user(name):
     return render_template('user.html', name=name)
